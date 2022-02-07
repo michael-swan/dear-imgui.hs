@@ -25,6 +25,7 @@ module DearImGui
   , Raw.setCurrentContext
 
     -- * Main
+  , Raw.getStyle
   , Raw.newFrame
   , Raw.endFrame
   , Raw.render
@@ -69,6 +70,9 @@ module DearImGui
   , setNextWindowSizeConstraints
   , setNextWindowCollapsed
   , setNextWindowBgAlpha
+
+    -- ** Content Region
+  , Raw.getContentRegionAvail
 
     -- ** Child Windows
   , withChild
@@ -259,10 +263,21 @@ module DearImGui
   , ClipItems(..)
   , ClipRange(..)
 
+    -- ** Input Utilities: Mouse
+  , Raw.isMouseDown
+  , Raw.isMouseClicked
+  , Raw.isMouseReleased
+  , Raw.isMouseDoubleClicked
+  , Raw.setMouseCursor
+  , Raw.getMousePos
+
     -- ** Miscellaneous
   , Raw.getBackgroundDrawList
   , Raw.getForegroundDrawList
   , Raw.imCol32
+
+    -- ** Text Utilites
+  , calcTextSize
 
     -- * Types
   , module DearImGui.Enums
@@ -1612,6 +1627,10 @@ setCursorPos :: (MonadIO m, HasGetter ref ImVec2) => ref -> m ()
 setCursorPos posRef = liftIO do
   pos <- get posRef
   with pos Raw.setCursorPos
+
+calcTextSize :: MonadIO m => String -> m ImVec2
+calcTextSize t = liftIO do
+  withCString t Raw.calcTextSize
 
 -- | Add an element to a ID stack
 --

@@ -156,6 +156,7 @@ library
     , StateVar
     , unliftio
     , vector
+    , transformers
 
   if flag(opengl2)
     exposed-modules:

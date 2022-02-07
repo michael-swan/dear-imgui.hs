@@ -41,5 +41,6 @@ imguiContext = mempty
       , ( TypeName "ImFontConfig", [t| ImFontConfig |] )
       , ( TypeName "ImFontGlyphRangesBuilder", [t| ImFontGlyphRangesBuilder |] )
       , ( TypeName "ImGuiListClipper", [t| ImGuiListClipper |] )
+      , ( TypeName "ImGuiStyle", [t| ImGuiStyle |] )
       ]
   }

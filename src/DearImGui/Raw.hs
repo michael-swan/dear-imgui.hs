@@ -24,6 +24,7 @@ module DearImGui.Raw
   , setCurrentContext
 
     -- * Main
+  , getStyle
   , newFrame
   , endFrame
   , render
@@ -64,6 +65,9 @@ module DearImGui.Raw
   , setNextWindowSizeConstraints
   , setNextWindowCollapsed
   , setNextWindowBgAlpha
+
+    -- ** Content Region
+  , getContentRegionAvail
 
     -- ** Child Windows
   , beginChild
@@ -213,10 +217,21 @@ module DearImGui.Raw
 
     -- * Utilities
 
+    -- ** Input Utilities: Mouse
+  , isMouseDown
+  , isMouseClicked
+  , isMouseReleased
+  , isMouseDoubleClicked
+  , setMouseCursor
+  , getMousePos
+
     -- ** Miscellaneous
   , getBackgroundDrawList
   , getForegroundDrawList
   , imCol32
+
+    -- ** Text Utilities
+  , calcTextSize
 
     -- * Types
   , module DearImGui.Enums
@@ -276,6 +291,14 @@ setCurrentContext :: MonadIO m => Context -> m ()
 setCurrentContext (Context contextPtr) = liftIO do
   [C.exp| void { SetCurrentContext($(ImGuiContext* contextPtr)) } |]
 
+getStyle :: (MonadIO m) => m ImGuiStyle
+getStyle = liftIO do
+  C.withPtr_ \ptr ->
+    [C.block|
+      void {
+        *$(ImGuiStyle * ptr) = GetStyle();
+      }
+    |]
 
 -- | Start a new Dear ImGui frame, you can submit any command from this point
 -- until 'render'/'endFrame'.
@@ -1371,6 +1394,15 @@ setNextWindowBgAlpha alpha = liftIO do
   [C.exp| void { SetNextWindowBgAlpha($(float alpha)) } |]
 
 
+getContentRegionAvail :: (MonadIO m) => m ImVec2
+getContentRegionAvail = liftIO do
+  C.withPtr_ \ptr ->
+    [C.block|
+      void {
+        *$(ImVec2 * ptr) = GetContentRegionAvail();
+      }
+    |]
+
 -- | undo a sameLine or force a new line when in an horizontal-layout context.
 --
 -- Wraps @ImGui::NewLine()@
@@ -1555,6 +1587,34 @@ wantCaptureKeyboard :: MonadIO m => m Bool
 wantCaptureKeyboard = liftIO do
   (0 /=) <$> [C.exp| bool { GetIO().WantCaptureKeyboard } |]
 
+isMouseDown :: MonadIO m => ImGuiMouseButton -> m Bool
+isMouseDown button = liftIO do
+  (0 /=) <$> [C.exp| bool { IsMouseDown($(ImGuiMouseButton button)) } |]
+
+isMouseClicked :: MonadIO m => ImGuiMouseButton -> m Bool
+isMouseClicked button = liftIO do
+  (0 /=) <$> [C.exp| bool { IsMouseClicked($(ImGuiMouseButton button)) } |]
+
+isMouseReleased :: MonadIO m => ImGuiMouseButton -> m Bool
+isMouseReleased button = liftIO do
+  (0 /=) <$> [C.exp| bool { IsMouseReleased($(ImGuiMouseButton button)) } |]
+
+isMouseDoubleClicked :: MonadIO m => ImGuiMouseButton -> m Bool
+isMouseDoubleClicked button = liftIO do
+  (0 /=) <$> [C.exp| bool { IsMouseDoubleClicked($(ImGuiMouseButton button)) } |]
+
+setMouseCursor :: MonadIO m => ImGuiMouseCursor -> m ()
+setMouseCursor cursor = liftIO do
+  [C.exp| void { SetMouseCursor($(ImGuiMouseCursor cursor)) } |]
+
+getMousePos :: MonadIO m => m ImVec2
+getMousePos = liftIO do
+  C.withPtr_ \ptr ->
+    [C.block|
+      void {
+        *$(ImVec2 * ptr) = GetMousePos();
+      }
+    |]
 -- | This draw list will be the first rendering one.
 --
 -- Useful to quickly draw shapes/text behind dear imgui contents.
@@ -1592,3 +1652,12 @@ imCol32 r g b a = unsafePerformIO
       )
     }
   |]
+
+calcTextSize :: (MonadIO m) => CString -> m ImVec2
+calcTextSize textPtr = liftIO do
+  C.withPtr_ \ptr ->
+    [C.block|
+      void {
+        *$(ImVec2 * ptr) = CalcTextSize($(char* textPtr));
+      }
+    |]

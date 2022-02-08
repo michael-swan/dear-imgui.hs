@@ -116,7 +116,11 @@ module DearImGui
   , Raw.endGroup
 
   , setCursorPos
+  , Raw.getCursorScreenPos
   , Raw.alignTextToFramePadding
+
+    -- * Style read access
+  , Raw.getColorU32
 
     -- * ID stack
   , withID
@@ -268,6 +272,7 @@ module DearImGui
   , Raw.isMouseClicked
   , Raw.isMouseReleased
   , Raw.isMouseDoubleClicked
+  , isMouseHoveringRect
   , Raw.setMouseCursor
   , Raw.getMousePos
 
@@ -1628,9 +1633,15 @@ setCursorPos posRef = liftIO do
   pos <- get posRef
   with pos Raw.setCursorPos
 
-calcTextSize :: MonadIO m => String -> m ImVec2
+calcTextSize :: (MonadIO m) => String -> m ImVec2
 calcTextSize t = liftIO do
   withCString t Raw.calcTextSize
+
+isMouseHoveringRect :: (MonadIO m) => ImVec2 -> ImVec2 -> m Bool
+isMouseHoveringRect minVec maxVec = liftIO do
+  with minVec \minVecPtr ->
+    with maxVec \maxVecPtr ->
+      Raw.isMouseHoveringRect minVecPtr maxVecPtr
 
 -- | Add an element to a ID stack
 --

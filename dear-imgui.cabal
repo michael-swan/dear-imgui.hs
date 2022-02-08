@@ -67,7 +67,7 @@ flag opengl2
   description:
     Enable OpenGL 2 backend.
   default:
-    False
+    True
   manual:
     True
 

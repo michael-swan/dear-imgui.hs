@@ -97,6 +97,9 @@ module DearImGui.Raw
   , getCursorScreenPos
   , alignTextToFramePadding
 
+    -- * Style read access
+  , getColorU32
+
     -- * Widgets
     -- ** Text
   , textUnformatted
@@ -222,6 +225,7 @@ module DearImGui.Raw
   , isMouseClicked
   , isMouseReleased
   , isMouseDoubleClicked
+  , isMouseHoveringRect
   , setMouseCursor
   , getMousePos
 
@@ -1486,6 +1490,14 @@ alignTextToFramePadding :: (MonadIO m) => m ()
 alignTextToFramePadding = liftIO do
   [C.exp| void { AlignTextToFramePadding() } |]
 
+getColorU32 :: (MonadIO m) => ImGuiCol -> m ImU32
+getColorU32 color = liftIO do
+  C.withPtr_ \ptr ->
+    [C.block|
+      void {
+        *$(ImU32 * ptr) = GetColorU32($(ImGuiCol color));
+      }
+    |]
 
 -- | Set cursor position in window-local coordinates
 --
@@ -1602,6 +1614,10 @@ isMouseReleased button = liftIO do
 isMouseDoubleClicked :: MonadIO m => ImGuiMouseButton -> m Bool
 isMouseDoubleClicked button = liftIO do
   (0 /=) <$> [C.exp| bool { IsMouseDoubleClicked($(ImGuiMouseButton button)) } |]
+
+isMouseHoveringRect :: MonadIO m => Ptr ImVec2 -> Ptr ImVec2 -> m Bool
+isMouseHoveringRect minVecPtr maxVecPtr = liftIO do
+  (0 /=) <$> [C.exp| bool { IsMouseHoveringRect(*$(ImVec2* minVecPtr), *$(ImVec2* maxVecPtr)) } |]
 
 setMouseCursor :: MonadIO m => ImGuiMouseCursor -> m ()
 setMouseCursor cursor = liftIO do
